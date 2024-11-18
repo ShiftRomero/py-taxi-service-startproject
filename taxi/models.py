@@ -1,44 +1,32 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db import models
+from django.db.models import UniqueConstraint
+
+
+class Car(models.Model):
+    model = models.CharField(max_length=50)
+    manufacturer = models.ForeignKey("Manufacturer", on_delete=models.CASCADE)
+    drivers = models.ManyToManyField("Driver", related_name="cars")
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=["model", "manufacturer"], name="unique_car"),
+        ]
+
+    def __str__(self):
+        return f"{self.manufacturer}, {self.model}"
 
 
 class Manufacturer(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    country = models.CharField(max_length=100)
+    name = models.CharField(max_length=50)
+    country = models.CharField(max_length=50)
 
     def __str__(self):
         return self.name
 
-    class Meta:
-        verbose_name = "manufacturer"
-        verbose_name_plural = "manufacturers"
 
 class Driver(AbstractUser):
-    license_number = models.CharField(max_length=255, unique=True)
-    groups = models.ManyToManyField(
-        "auth.Group",
-        related_name="driver_groups",
-        blank=True
-    )
-    user_permissions = models.ManyToManyField(
-        "auth.Permission",
-        related_name="driver_permissions",
-        blank=True
-    )
-
-    class Meta:
-        verbose_name = "driver"
-        verbose_name_plural = "drivers"
-
-
-class Car(models.Model):
-    model = models.CharField(max_length=100)
-    manufacturer = models.ForeignKey(Manufacturer, on_delete=models.CASCADE, related_name="cars")
-    drivers = models.ManyToManyField(Driver)
+    license_number = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
-        return self.model
-
-    class Meta:
-        verbose_name = "car"
-        verbose_name_plural = "cars"
+        return f"{self.username}: ({self.first_name} {self.last_name})"
